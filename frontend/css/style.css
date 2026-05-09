@@ -351,7 +351,7 @@ tr:hover td { background-color: #f8fafc; }
 /* Login */
 .login-body { display: flex; align-items: center; justify-content: center; background: var(--bg-color); }
 .login-card { 
-  width: 100%; max-width: 400px; padding: 3rem 2rem; 
+  width: 100%; max-width: 480px; padding: 3.5rem 3rem; 
   border-radius: 16px; 
   background: var(--card-bg);
   border: 1px solid var(--border-color);

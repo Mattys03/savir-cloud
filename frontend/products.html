@@ -15,6 +15,8 @@
         <button class="btn btn-success" onclick="openModal()">Novo Produto</button>
       </div>
       <div id="table-container"><p class="loading">Carregando...</p></div>
+      <div class="info-banner admin" id="perm-admin" style="display:none">👑 Você é administrador e pode gerenciar todos os produtos.</div>
+      <div class="info-banner user" id="perm-user" style="display:none">🔒 Você só pode editar/excluir os produtos que você criou.</div>
     </div>
   </div>
 
@@ -37,6 +39,9 @@
   <script src="js/app.js"></script>
   <script>
     requireAuth(); renderHeader();
+    if (isAdmin()) document.getElementById('perm-admin').style.display = 'block';
+    else document.getElementById('perm-user').style.display = 'block';
+
     let editingId = null;
 
     async function loadTable() {
@@ -45,10 +50,15 @@
         const tc = document.getElementById('table-container');
         if (list.length === 0) { tc.innerHTML = '<p class="loading">Nenhum produto cadastrado.</p>'; return; }
         tc.innerHTML = '<table><thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead><tbody>' +
-          list.map(p => '<tr><td>' + (p.id||'').slice(0,8) + '</td><td><strong>' + p.name + '</strong></td><td>' + p.description + '</td><td>R$ ' + Number(p.price).toFixed(2) + '</td><td>' + p.stock + '</td><td>' +
-            '<button class="action-btn action-edit" onclick="edit(\'' + p.id + '\')">Editar</button>' +
-            '<button class="action-btn action-delete" onclick="del(\'' + p.id + '\')">Excluir</button>' +
-          '</td></tr>').join('') + '</tbody></table>';
+          list.map(p => {
+            const isOwner = p.createdBy === currentUser.id;
+            const canEdit = isOwner || isAdmin();
+            return '<tr><td>' + (p.id||'').slice(0,8) + '</td><td><strong>' + p.name + '</strong></td><td>' + p.description + '</td><td>R$ ' + Number(p.price).toFixed(2) + '</td><td>' + p.stock + '</td><td>' +
+              (canEdit ? '<button class="action-btn action-edit" onclick="edit(\'' + p.id + '\')">Editar</button>' : '') +
+              (canEdit ? '<button class="action-btn action-delete" onclick="del(\'' + p.id + '\')">Excluir</button>' : '') +
+              (!canEdit ? '<span style="color:#999;font-size:0.8rem">Sem permissão</span>' : '') +
+            '</td></tr>';
+          }).join('') + '</tbody></table>';
       } catch (e) { document.getElementById('table-container').innerHTML = '<div class="alert alert-error">' + e.message + '</div>'; }
     }
 

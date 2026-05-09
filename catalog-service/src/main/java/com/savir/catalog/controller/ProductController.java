@@ -36,8 +36,14 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Product product) {
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Product product, @RequestHeader(value = "user-id", required = false) String userId) {
         try {
+            Product existing = productService.findById(id).orElseThrow(() -> new RuntimeException("Não encontrado"));
+            boolean isOwner = existing.getCreatedBy() != null && existing.getCreatedBy().equals(userId);
+            boolean isAdmin = userId != null && authClient.isAdministrator(userId);
+            if (!isOwner && !isAdmin) {
+                return ResponseEntity.status(403).body(Map.of("error", "Acesso negado. Apenas o criador ou administradores podem modificar este registro."));
+            }
             return ResponseEntity.ok(productService.update(id, product));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -47,9 +53,11 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id, @RequestHeader(value = "user-id", required = false) String userId) {
         try {
-            if (userId != null) {
-                boolean isAdmin = authClient.isAdministrator(userId);
-                System.out.println("🔗 Comunicação com auth-service: usuário " + userId + " é admin? " + isAdmin);
+            Product existing = productService.findById(id).orElseThrow(() -> new RuntimeException("Não encontrado"));
+            boolean isOwner = existing.getCreatedBy() != null && existing.getCreatedBy().equals(userId);
+            boolean isAdmin = userId != null && authClient.isAdministrator(userId);
+            if (!isOwner && !isAdmin) {
+                return ResponseEntity.status(403).body(Map.of("error", "Acesso negado. Apenas o criador ou administradores podem excluir este registro."));
             }
             productService.delete(id);
             return ResponseEntity.ok(Map.of("success", true, "message", "Produto excluído com sucesso"));

@@ -1,0 +1,15 @@
+branch-defaults:
+  main:
+    environment: savir-java-env
+global:
+  application_name: savir-sistemas
+  default_ec2_keyname: null
+  default_platform: Docker
+  default_region: sa-east-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  sc: null
+  workspace_type: Application

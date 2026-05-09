@@ -1,6 +1,5 @@
 .git
 .gitignore
 .elasticbeanstalk/app_versions
-*/target
 *.zip
 README.md

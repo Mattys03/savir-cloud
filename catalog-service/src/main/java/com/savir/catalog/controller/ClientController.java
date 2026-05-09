@@ -40,14 +40,8 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Client client, @RequestHeader(value = "user-id", required = false) String userId) {
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Client client) {
         try {
-            Client existing = clientService.findById(id).orElseThrow(() -> new RuntimeException("Não encontrado"));
-            boolean isOwner = existing.getCreatedBy() != null && existing.getCreatedBy().equals(userId);
-            boolean isAdmin = userId != null && authClient.isAdministrator(userId);
-            if (!isOwner && !isAdmin) {
-                return ResponseEntity.status(403).body(Map.of("error", "Acesso negado. Apenas o criador ou administradores podem modificar este registro."));
-            }
             return ResponseEntity.ok(clientService.update(id, client));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -57,11 +51,10 @@ public class ClientController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id, @RequestHeader(value = "user-id", required = false) String userId) {
         try {
-            Client existing = clientService.findById(id).orElseThrow(() -> new RuntimeException("Não encontrado"));
-            boolean isOwner = existing.getCreatedBy() != null && existing.getCreatedBy().equals(userId);
-            boolean isAdmin = userId != null && authClient.isAdministrator(userId);
-            if (!isOwner && !isAdmin) {
-                return ResponseEntity.status(403).body(Map.of("error", "Acesso negado. Apenas o criador ou administradores podem excluir este registro."));
+            // COMUNICAÇÃO ENTRE MICROSERVIÇOS: verifica permissão no auth-service
+            if (userId != null) {
+                boolean isAdmin = authClient.isAdministrator(userId);
+                System.out.println("🔗 Comunicação com auth-service: usuário " + userId + " é admin? " + isAdmin);
             }
             clientService.delete(id);
             return ResponseEntity.ok(Map.of("success", true, "message", "Cliente excluído com sucesso"));

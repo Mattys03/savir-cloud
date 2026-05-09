@@ -70,7 +70,7 @@
         </div>
         <div class="form-group">
           <label for="reg-password">Crie uma Senha</label>
-          <input type="password" id="reg-password" placeholder="Mínimo 3 caracteres" required>
+          <input type="password" id="reg-password" required>
         </div>
         <button type="submit" class="btn btn-primary" id="btn-register" style="width:100%; padding:14px; margin-top:10px; justify-content:center;">Criar Conta Grátis</button>
       </form>
@@ -129,7 +129,7 @@
       };
 
       try {
-        const response = await fetch(API_AUTH + '/users', {
+        const response = await fetch(AUTH_URL + '/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

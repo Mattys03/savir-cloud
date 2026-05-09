@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Savir Sistemas - Produtos</title>
+  <title>Savir Cloud - Produtos</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,11 +12,11 @@
     <div class="card">
       <div class="card-header">
         <h2>Lista de Produtos</h2>
-        <button class="btn btn-success" onclick="openModal()">Novo Produto</button>
+        <button class="btn btn-primary" onclick="openModal()">Novo Produto</button>
       </div>
       <div id="table-container"><p class="loading">Carregando...</p></div>
-      <div class="info-banner admin" id="perm-admin" style="display:none">👑 Você é administrador e pode gerenciar todos os produtos.</div>
-      <div class="info-banner user" id="perm-user" style="display:none">🔒 Você só pode editar/excluir os produtos que você criou.</div>
+      <div class="info-banner admin" id="perm-admin" style="display:none">Você é administrador e pode gerenciar todos os produtos.</div>
+      <div class="info-banner user" id="perm-user" style="display:none">Você só pode editar/excluir os produtos que você criou.</div>
     </div>
   </div>
 
@@ -30,7 +30,7 @@
         <div class="form-group"><label>Estoque</label><input type="number" id="f-stock" required></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-          <button type="submit" class="btn btn-success">Gravar</button>
+          <button type="submit" class="btn btn-primary">Gravar</button>
         </div>
       </form>
     </div>
@@ -52,11 +52,9 @@
         tc.innerHTML = '<table><thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead><tbody>' +
           list.map(p => {
             const isOwner = p.createdBy === currentUser.id;
-            const canEdit = isOwner || isAdmin();
+            const canManage = isAdmin() || isOwner;
             return '<tr><td>' + (p.id||'').slice(0,8) + '</td><td><strong>' + p.name + '</strong></td><td>' + p.description + '</td><td>R$ ' + Number(p.price).toFixed(2) + '</td><td>' + p.stock + '</td><td>' +
-              (canEdit ? '<button class="action-btn action-edit" onclick="edit(\'' + p.id + '\')">Editar</button>' : '') +
-              (canEdit ? '<button class="action-btn action-delete" onclick="del(\'' + p.id + '\')">Excluir</button>' : '') +
-              (!canEdit ? '<span style="color:#999;font-size:0.8rem">Sem permissão</span>' : '') +
+              (canManage ? '<button class="action-btn action-edit" onclick="edit(\'' + p.id + '\')">Editar</button><button class="action-btn action-delete" onclick="del(\'' + p.id + '\')">Excluir</button>' : '<span style="color:#94a3b8;font-size:0.8rem">Somente leitura</span>') +
             '</td></tr>';
           }).join('') + '</tbody></table>';
       } catch (e) { document.getElementById('table-container').innerHTML = '<div class="alert alert-error">' + e.message + '</div>'; }
@@ -66,8 +64,9 @@
     function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
     async function edit(id) {
-      editingId = id;
       const p = await getProductById(id);
+      if (!isAdmin() && p.createdBy !== currentUser.id) { alert('Você não tem permissão para editar este produto.'); return; }
+      editingId = id;
       document.getElementById('modal-title').textContent = 'Editar Produto';
       document.getElementById('f-name').value = p.name;
       document.getElementById('f-desc').value = p.description;
@@ -78,18 +77,18 @@
 
     async function del(id) {
       if (!confirm('Tem certeza que deseja excluir este produto?')) return;
-      try { await deleteProduct(id); alert('✅ Produto excluído!'); loadTable(); }
-      catch (e) { alert('❌ ' + e.message); }
+      try { await deleteProduct(id); alert('Produto excluído!'); loadTable(); }
+      catch (e) { alert('Erro: ' + e.message); }
     }
 
     document.getElementById('product-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = { name: document.getElementById('f-name').value, description: document.getElementById('f-desc').value, price: parseFloat(document.getElementById('f-price').value), stock: parseInt(document.getElementById('f-stock').value) };
       try {
-        if (editingId) { await updateProduct(editingId, data); alert('✅ Produto atualizado!'); }
-        else { await createProduct(data); alert('✅ Produto cadastrado!'); }
+        if (editingId) { await updateProduct(editingId, data); alert('Produto atualizado!'); }
+        else { data.createdBy = currentUser.id; await createProduct(data); alert('Produto cadastrado!'); }
         closeModal(); loadTable();
-      } catch (e) { alert('❌ ' + e.message); }
+      } catch (e) { alert('Erro: ' + e.message); }
     });
 
     loadTable();

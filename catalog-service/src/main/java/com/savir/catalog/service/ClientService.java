@@ -20,9 +20,22 @@ public class ClientService {
 
     public List<Client> findAll() { return clientRepository.findAll(); }
     public Optional<Client> findById(String id) { return clientRepository.findById(id); }
-    public Client create(Client client) { return clientRepository.save(client); }
+    private void validate(Client client) {
+        if (client.getEmail() == null || !client.getEmail().contains("@")) throw new RuntimeException("O e-mail deve conter um @ válido.");
+        String phoneDigits = client.getPhone() != null ? client.getPhone().replaceAll("\\D", "") : "";
+        if (phoneDigits.length() < 10) throw new RuntimeException("O telefone deve conter um DDD válido (ex: 85) e o número.");
+        if (client.getAddress() == null || !client.getAddress().toLowerCase().matches("^(rua|av\\.|avenida|av|travessa)\\b.*")) {
+            throw new RuntimeException("O endereço deve começar com Rua ou Avenida (Av).");
+        }
+    }
+
+    public Client create(Client client) {
+        validate(client);
+        return clientRepository.save(client);
+    }
 
     public Client update(String id, Client updated) {
+        validate(updated);
         return clientRepository.findById(id).map(c -> {
             c.setName(updated.getName());
             c.setEmail(updated.getEmail());

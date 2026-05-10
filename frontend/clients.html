@@ -84,7 +84,15 @@
 
     document.getElementById('client-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const data = { name: document.getElementById('f-name').value, email: document.getElementById('f-email').value, phone: document.getElementById('f-phone').value, address: document.getElementById('f-address').value };
+      const email = document.getElementById('f-email').value;
+      const phone = document.getElementById('f-phone').value;
+      const address = document.getElementById('f-address').value;
+
+      if (!email.includes('@')) { alert('O e-mail deve conter um @ válido.'); return; }
+      if (!/^\d{2}/.test(phone.replace(/\D/g, '')) || phone.replace(/\D/g, '').length < 10) { alert('O telefone deve conter um DDD válido (ex: 85) e o número.'); return; }
+      if (!/^(rua|av\.|avenida|av|travessa)\b/i.test(address)) { alert('O endereço deve começar com Rua ou Avenida (Av).'); return; }
+
+      const data = { name: document.getElementById('f-name').value, email, phone, address };
       try {
         if (editingId) { await updateClient(editingId, data); alert('Cliente atualizado!'); }
         else { data.createdBy = currentUser.id; await createClient(data); alert('Cliente cadastrado!'); }

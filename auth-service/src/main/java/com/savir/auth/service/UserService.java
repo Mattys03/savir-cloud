@@ -42,11 +42,18 @@ public class UserService {
         return userRepository.findByLoginAndPassword(login, password);
     }
 
+    private void validate(User user) {
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            throw new RuntimeException("O e-mail deve conter um @ válido.");
+        }
+    }
+
     /**
      * GRASP Creator: Cria e persiste um novo usuário.
      * Valida se o login já existe antes de criar.
      */
     public User create(User user) {
+        validate(user);
         Optional<User> existing = userRepository.findByLogin(user.getLogin());
         if (existing.isPresent()) {
             throw new RuntimeException("Login já está em uso: " + user.getLogin());
@@ -55,6 +62,7 @@ public class UserService {
     }
 
     public User update(String id, User updatedUser) {
+        validate(updatedUser);
         return userRepository.findById(id).map(user -> {
             user.setName(updatedUser.getName());
             user.setEmail(updatedUser.getEmail());

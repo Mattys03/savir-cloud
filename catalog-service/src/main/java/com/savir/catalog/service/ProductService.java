@@ -16,9 +16,18 @@ public class ProductService {
 
     public List<Product> findAll() { return productRepository.findAll(); }
     public Optional<Product> findById(String id) { return productRepository.findById(id); }
-    public Product create(Product product) { return productRepository.save(product); }
+    private void validate(Product product) {
+        if (product.getPrice() == null || product.getPrice() <= 0) throw new RuntimeException("O preço não pode ser zero ou negativo.");
+        if (product.getStock() == null || product.getStock() <= 0) throw new RuntimeException("O estoque não pode ser zero ou negativo.");
+    }
+
+    public Product create(Product product) {
+        validate(product);
+        return productRepository.save(product);
+    }
 
     public Product update(String id, Product updated) {
+        validate(updated);
         return productRepository.findById(id).map(p -> {
             p.setName(updated.getName());
             p.setDescription(updated.getDescription());

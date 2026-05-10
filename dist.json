@@ -1,0 +1,38 @@
+{
+  "CallerReference": "20260509211833",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "EBOrigin",
+        "DomainName": "savir-java-prod.sa-east-1.elasticbeanstalk.com",
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "http-only"
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "EBOrigin",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 7,
+      "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    },
+    "ForwardedValues": {
+      "QueryString": true,
+      "Cookies": { "Forward": "all" },
+      "Headers": {
+        "Quantity": 1,
+        "Items": ["*"]
+      }
+    },
+    "MinTTL": 0,
+    "DefaultTTL": 0,
+    "MaxTTL": 0
+  },
+  "Comment": "Savir Cloud Proxy",
+  "Enabled": true
+}

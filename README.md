@@ -157,5 +157,28 @@ docker-compose up --build
 - **Spring Data MongoDB**
 - **MongoDB Atlas** (banco de dados na nuvem)
 - **HTML5, CSS3, JavaScript** (frontend sem frameworks)
-- **Docker** (opcional, para containerização)
+- **Docker** (para containerização e deploy)
 - **Maven** (gerenciador de dependências)
+- **AWS Elastic Beanstalk & CloudFront** (Hospedagem e proxy HTTPS)
+
+---
+
+## 8. Arquitetura de Deploy na AWS
+
+O sistema está hospedado na Amazon Web Services (AWS) com foco em **alta performance de deploy** e **segurança mobile**.
+
+### 8.1. Otimização de Build (Fast Deploy)
+Como a instância do Elastic Beanstalk (EC2 `t3.micro`) possui recursos limitados (1GB de RAM), compilar duas aplicações Java via Maven diretamente no servidor causava lentidão extrema (mais de 15 minutos) e eventuais falhas por falta de memória (Timeouts). 
+A solução implementada foi a adoção de **Deploy de JARs Pré-compilados**:
+1. Os arquivos `.jar` são compilados localmente (na máquina de desenvolvimento).
+2. O `Dockerfile` foi radicalmente simplificado para utilizar a imagem `eclipse-temurin:17-jre-alpine` (super leve, ~50MB) e apenas copiar os `.jar` prontos.
+3. Isso reduziu o tempo de deploy na AWS de **~15 minutos para apenas ~30 segundos**.
+
+### 8.2. Proxy Seguro com AWS CloudFront (HTTPS)
+Ao acessar a aplicação via dispositivos móveis (ex: links no WhatsApp ou navegadores modernos como Safari/Chrome mobile), os aparelhos forçam conexões seguras (`https://`). Como o domínio nativo da AWS (`.elasticbeanstalk.com`) não suporta a emissão direta de certificados SSL/TLS, os acessos mobile ficavam travados em um carregamento infinito.
+
+Para resolver o problema de forma nativa e 100% gratuita na AWS:
+- Criou-se uma distribuição no **AWS CloudFront** atuando como proxy reverso.
+- O CloudFront fornece um domínio seguro (`https://d332eloo83c24a.cloudfront.net`) com um certificado SSL válido emitido pela Amazon.
+- Quando o usuário acessa via celular de forma segura, o CloudFront recebe o tráfego em HTTPS e repassa para o ambiente do Elastic Beanstalk (via HTTP interno), garantindo o carregamento imediato da aplicação sem erros de privacidade ou telas pretas.
+

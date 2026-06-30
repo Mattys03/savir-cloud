@@ -5,7 +5,7 @@ branch-defaults:
     environment: savir-java-env
 global:
   application_name: savir-sistemas
-  default_ec2_keyname: null
+  default_ec2_keyname: vockey
   default_platform: Docker
   default_region: sa-east-1
   include_git_submodules: true

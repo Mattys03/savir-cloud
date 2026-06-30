@@ -7,7 +7,7 @@
 - Matheus Rego Pinheiro
 - Carlos Eduardo Batista Oliveira
 - Levi da Silva Araújo
-- Guilherme Sobrinho Pinto
+- Guilherme S.
 
 ---
 

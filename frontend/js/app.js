@@ -1,7 +1,7 @@
 /* ===== Savir Sistemas — API + App Logic ===== */
 
-const AUTH_URL = window.AUTH_URL || '';
-const CATALOG_URL = window.CATALOG_URL || '';
+const AUTH_URL = window.AUTH_URL || (window.location.protocol === 'file:' ? 'http://localhost:8081' : '');
+const CATALOG_URL = window.CATALOG_URL || (window.location.protocol === 'file:' ? 'http://localhost:8082' : '');
 
 // Estado global
 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;

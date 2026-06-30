@@ -1,0 +1,89 @@
+================================================================================
+              RESUMO TÉCNICO E ROTEIRO DE APRESENTAÇÃO - SAVIR CLOUD
+================================================================================
+
+Este documento descreve as definições arquiteturais, padrões de projeto e o
+funcionamento prático do sistema Savir Cloud, estruturado estritamente sobre as
+exigências do seminário de Métodos Avançados de Programação (MAP).
+
+--------------------------------------------------------------------------------
+1. ARQUITETURA GERAL DO SISTEMA
+--------------------------------------------------------------------------------
+O Savir Cloud é um sistema distribuído de gestão empresarial composto por:
+- Interface de Usuário (Frontend): Desenvolvida de forma limpa em HTML5, CSS3 e
+  JavaScript Vanilla (sem frameworks), consumindo as APIs de forma assíncrona.
+- Gateway de Entrada (Nginx): Servidor proxy reverso posicionado na porta 80 que
+  recebe as requisições HTTP do cliente, distribui as rotas do frontend e realiza
+  o roteamento inteligente dos endpoints de API para as portas internas dos
+  microserviços.
+- Auth Service (Porta 8081): Microserviço em Java 17 com Spring Boot encarregado
+  exclusivamente da autenticação, cadastro e controle de perfis de usuários.
+- Catalog Service (Porta 8082): Microserviço em Java 17 com Spring Boot encarregado
+  da gestão de clientes e catálogo de produtos.
+- Persistência em Nuvem (MongoDB Atlas): Banco de dados NoSQL gerenciado de forma
+  remota, garantindo que os dados não dependam de persistência local na máquina.
+
+--------------------------------------------------------------------------------
+2. FUNCIONAMENTO E COMUNICAÇÃO DE MICROSERVIÇOS
+--------------------------------------------------------------------------------
+Os microserviços rodam em containers separados, garantindo isolamento de falhas.
+Se um serviço cair, o outro permanece operável.
+A comunicação entre eles é síncrona via HTTP REST:
+- Cenário de Exclusão Segura: Quando o Catalog Service recebe uma requisição para
+  excluir um cliente ou produto, ele precisa validar a permissão do solicitante.
+- Mecanismo de Rede: O Catalog Service utiliza a classe RestTemplate do Spring
+  para disparar uma chamada interna HTTP GET ao Auth Service (porta 8081) no
+  endpoint /api/users/{id}. O Auth Service responde com os dados do usuário em
+  formato JSON. O Catalog então analisa se o perfil é "Administrador" para
+  autorizar ou negar a exclusão.
+
+--------------------------------------------------------------------------------
+3. ARQUITETURA MVC E PADRÕES GRASP APLICADOS
+--------------------------------------------------------------------------------
+O código-fonte foi modularizado respeitando a separação de conceitos do MVC:
+- Model: Classes de domínio anotadas com @Document (User.java, Client.java,
+  Product.java) que representam a estrutura de persistência no MongoDB.
+- View: Páginas web estáticas isoladas de qualquer lógica de backend,
+  possibilitando alterações de layout sem impacto no código Java.
+- Controller: Classes controladoras (UserController, ClientController, etc.) que
+  mapeiam endpoints HTTP REST e respondem payloads JSON.
+
+Padrões GRASP (General Responsibility Assignment Software Patterns) Utilizados:
+1. Controller (Controlador): As classes Controller tratam a entrada HTTP e apenas
+   delegam a lógica para as classes de serviço correspondentes, protegendo o
+   domínio.
+2. Creator (Criador): A responsabilidade de criar instâncias das entidades foi
+   atribuída aos respectivos Services, pois eles contêm o contexto do repositório
+   e as regras de criação.
+3. Information Expert (Especialista na Informação): Cada Service detém a
+   responsabilidade sobre seu domínio de dados (ex: UserService valida
+   duplicidade de logins, ProductService impede valores inconsistentes).
+4. Alta Coesão: Cada módulo realiza uma única responsabilidade. Repositories fazem
+   acesso ao banco, Services processam regras, Controllers direcionam tráfego.
+5. Baixo Acoplamento: Os microserviços não importam código direto um do outro.
+   Eles dependem puramente de requisições de rede REST com payloads JSON.
+
+--------------------------------------------------------------------------------
+4. ENDPOINTS DA API REST E VALIDAÇÕES DO SISTEMA
+--------------------------------------------------------------------------------
+As chamadas são feitas no padrão REST, utilizando os métodos HTTP e retornando
+JSON. O sistema implementa regras de negócio fundamentais tanto no frontend
+quanto nas validações de integridade no backend Java:
+- Clientes: O e-mail deve conter o caractere '@'. O telefone possui DDD de 2
+  dígitos obrigatório. O endereço deve conter obrigatoriamente a palavra 'Rua'
+  ou 'Avenida' (ou abreviações como 'Av').
+- Produtos: Preço e estoque devem ser obrigatoriamente maiores que zero.
+- Usuários: Login e e-mail não podem estar duplicados no sistema.
+
+--------------------------------------------------------------------------------
+5. CONTEXTO DE DEPLOY E DESENVOLVIMENTO MODULAR
+--------------------------------------------------------------------------------
+- Escalabilidade: A separação em módulos independentes permite escalar
+  serviços com maior volume de tráfego de maneira isolada.
+- Arquitetura de Nuvem: Implementada na AWS através do Elastic Beanstalk (com
+  containers Docker leves baseados em Alpine Linux contendo os JARs prontos) e
+  proxy seguro CloudFront HTTPS, eliminando problemas de carregamento móvel.
+- Execução Local Simplificada: O sistema utiliza scripts orquestradores (iniciar.bat
+  para Windows e iniciar.sh para Linux Mint) que gerenciam a inicialização em
+  segundo plano de ambos os serviços e encerram os processos Java nas portas
+  8081 e 8082 ao terminar a apresentação.

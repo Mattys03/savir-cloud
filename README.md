@@ -14,23 +14,23 @@ O objetivo deste sistema é demonstrar as melhores práticas do mercado em Engen
 Embora a interface visual seja herdada do nosso protótipo original (para manter a consistência da experiência do usuário), **toda a mecânica por trás das telas foi reescrita e otimizada** para rodar em um ecossistema robusto Java + AWS.
 
 ### 0. Tela de Autenticação (Segurança)
-<img src="screenshots/login_v2.png" width="800" alt="Login" />
+<img src="screenshots/login_v3.png" width="800" alt="Login" />
 *Autenticação corporativa utilizando **Spring Security** e emissão de JWT (JSON Web Tokens) assinados no backend. As senhas são criptografadas em banco com BCrypt, garantindo conformidade total com padrões de segurança enterprise.*
 
 ### 1. Dashboard Principal (Alta Disponibilidade)
-<img src="screenshots/dashboard_v2.png" width="800" alt="Dashboard" />
+<img src="screenshots/dashboard_v3.png" width="800" alt="Dashboard" />
 *O tráfego de dados para alimentar o Dashboard passa por um **Load Balancer (AWS ELB)** que distribui as requisições entre múltiplos contêineres Docker do Spring Boot. Isso resulta em carregamento instantâneo e ausência de gargalos, mesmo em horários de pico.*
 
 ### 2. Gestão de Usuários (JPA e Paginação)
-<img src="screenshots/users_v2.png" width="800" alt="Usuários" />
+<img src="screenshots/users_v3.png" width="800" alt="Usuários" />
 *A tabela é alimentada através da **Spring Data JPA**. A grande evolução aqui é que a paginação e ordenação ocorrem diretamente no motor do banco de dados Relacional, processando milhares de registros sem estourar a memória RAM da aplicação.*
 
 ### 3. Catálogo de Produtos (Auto Scaling)
-<img src="screenshots/products_v2.png" width="800" alt="Produtos" />
+<img src="screenshots/products_v3.png" width="800" alt="Produtos" />
 *Módulo de estoque protegido por Controle de Acesso (RBAC) através das anotações `@PreAuthorize` do Spring. Picos de acesso a este módulo desencadeiam o Auto Scaling da infraestrutura Cloud na AWS, escalando o sistema horizontalmente para dar conta da demanda.*
 
 ### 4. Cadastro de Clientes (Transações ACID)
-<img src="screenshots/clients_v2.png" width="800" alt="Clientes" />
+<img src="screenshots/clients_v3.png" width="800" alt="Clientes" />
 *Operações vitais de negócio agora são amparadas pelo gerenciador de transações do Spring (`@Transactional`). Qualquer interrupção durante o salvamento de um cliente engatilha um "Rollback" imediato, erradicando a chance de dados corrompidos no banco.*
 ## 🏗️ Arquitetura e Escopo
 

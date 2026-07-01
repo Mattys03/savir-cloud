@@ -16,6 +16,16 @@ jobs:
     - uses: actions/checkout@v4
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Build with Maven
+      run: |
+        cd auth-service && mvn clean package -DskipTests
+        cd ../catalog-service && mvn clean package -DskipTests
+        cd ..
     - name: Build Docker Compose
       run: |
         docker-compose build

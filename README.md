@@ -3,6 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-Spring_Boot-green?style=for-the-badge&logo=spring)
 ![AWS](https://img.shields.io/badge/Cloud-AWS-orange?style=for-the-badge&logo=amazon-aws)
 ![Docker](https://img.shields.io/badge/Container-Docker-blue?style=for-the-badge&logo=docker)
+[![Docker Build CI](https://github.com/Mattys03/savir-cloud/actions/workflows/docker-build.yml/badge.svg)](https://github.com/Mattys03/savir-cloud/actions/workflows/docker-build.yml)
 
 **Savir Cloud** é um ecossistema robusto de backend desenvolvido para sistemas de gestão corporativa. Construído sobre o framework **Spring Boot** (Java), a aplicação implementa uma arquitetura corporativa focada em escalabilidade, manutenibilidade e alta disponibilidade na nuvem (AWS).
 
